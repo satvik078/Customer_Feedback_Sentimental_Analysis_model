@@ -1,7 +1,7 @@
 streamlit
-transformers==4.41.2
-torch==2.2.2
-torchvision==0.17.2
+transformers
+torch
+torchvision
 pandas
 requests
 plotly
