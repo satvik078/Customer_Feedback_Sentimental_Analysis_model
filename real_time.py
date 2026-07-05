@@ -52,7 +52,18 @@ def predict(text):
 # CSV SMART DETECTION
 # ---------------------------
 def detect_text_column(df):
-    possible_names = ["review", "text", "comment", "feedback", "content"]
+    possible_names = [
+        "review",
+        "text",
+        "tweet",
+        "full_text",
+        "comment",
+        "feedback",
+        "content",
+        "body",
+        "message",
+        "caption",
+    ]
 
     for col in df.columns:
         if col.lower() in possible_names:
@@ -167,12 +178,20 @@ elif mode == "CSV":
         else:
             st.warning("Could not detect column")
 
-        selected_col = st.selectbox("Select column", df.columns)
+        columns = df.columns.tolist()
+        default_index = columns.index(auto_col) if auto_col in columns else 0
+        selected_col = st.selectbox("Select column", columns, index=default_index)
         col_to_use = auto_col if auto_col else selected_col
 
         if st.button("Analyze CSV"):
-            df = df.dropna()
-            texts = df[col_to_use].astype(str).tolist()[:200]
+            df = df.copy()
+            texts = df[col_to_use].fillna("").astype(str).str.strip()
+            df = df.loc[texts.astype(bool)].copy()
+            texts = texts[texts.astype(bool)].tolist()[:200]
+
+            if not texts:
+                st.error("No usable text found in the selected column")
+                st.stop()
 
             sentiments = []
             confidences = []
